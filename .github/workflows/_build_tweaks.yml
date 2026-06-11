@@ -165,6 +165,8 @@ jobs:
       - name: Build YTUHD
         if: ${{ inputs.enable_ytuhd }}
         run: |
+          export THEOS=$HOME/theos
+          git submodule update --init --recursive
           cd vendor/libvpx_ios && make
           cd ../dav1d_ios && make
           cd YTUHD && make clean package DEBUG=0 FINALPACKAGE=1 SIDELOAD=1
