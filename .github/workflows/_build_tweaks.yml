@@ -165,8 +165,8 @@ jobs:
       - name: Build YTUHD
         if: ${{ inputs.enable_ytuhd }}
         run: |
-          make libvpx   # vendor/libvpx_ios/libvpx.a
-          make dav1d    # vendor/dav1d_ios/libdav1d.a
+          cd vendor/libvpx_ios && make
+          cd ../dav1d_ios && make
           cd YTUHD && make clean package DEBUG=0 FINALPACKAGE=1 SIDELOAD=1
           mv packages/*.deb ../ytuhd.deb
 
