@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - name: Install Dependencies
-        run: brew install make ldid dpkg
+        run: brew install make ldid dpkg meson ninja
 
       - name: Set PATH environment variable
         run: |
@@ -165,7 +165,9 @@ jobs:
       - name: Build YTUHD
         if: ${{ inputs.enable_ytuhd }}
         run: |
-          cd YTUHD && make clean package DEBUG=0 FINALPACKAGE=1
+          make libvpx   # vendor/libvpx_ios/libvpx.a
+          make dav1d    # vendor/dav1d_ios/libdav1d.a
+          cd YTUHD && make clean package DEBUG=0 FINALPACKAGE=1 SIDELOAD=1
           mv packages/*.deb ../ytuhd.deb
 
       - name: Build Return-YouTube-Dislikes
