@@ -1,5 +1,17 @@
 #import "YTLite.h"
 
+static BOOL kHideShorts;
+static BOOL kNoAds;
+static BOOL kBackgroundPlayback;
+static BOOL kDisableCastButton;
+
+static void ReloadPreferences() {
+    kHideShorts = ytlBool(@"hideShorts");
+    kNoAds = ytlBool(@"noAds");
+    kBackgroundPlayback = ytlBool(@"backgroundPlayback");
+    kDisableCastButton = ytlBool(@"noCast");
+}
+
 static UIImage *YTImageNamed(NSString *imageName) {
     return [UIImage imageNamed:imageName inBundle:[NSBundle mainBundle] compatibleWithTraitCollection:nil];
 }
@@ -7,11 +19,11 @@ static UIImage *YTImageNamed(NSString *imageName) {
 // YouTube-X (https://github.com/PoomSmart/YouTube-X/)
 // Background Playback
 %hook YTIPlayabilityStatus
-- (BOOL)isPlayableInBackground { return ytlBool(@"backgroundPlayback") ? YES : NO; }
+- (BOOL)isPlayableInBackground { return kBackgroundPlayback; }
 %end
 
 %hook MLVideo
-- (BOOL)playableInBackground { return ytlBool(@"backgroundPlayback") ? YES : NO; }
+- (BOOL)playableInBackground { return kBackgroundPlayback; }
 %end
 
 // Disable Ads
@@ -56,7 +68,7 @@ static UIImage *YTImageNamed(NSString *imageName) {
 
 %hook YTSectionListViewController
 - (void)loadWithModel:(YTISectionListRenderer *)model {
-    if (ytlBool(@"noAds")) {
+    if (kNoAds) {
         NSMutableArray <YTISectionListSupportedRenderers *> *contentsArray = model.contentsArray;
         NSIndexSet *removeIndexes = [contentsArray indexesOfObjectsPassingTest:^BOOL(YTISectionListSupportedRenderers *renderers, NSUInteger idx, BOOL *stop) {
             YTIItemSectionRenderer *sectionRenderer = renderers.itemSectionRenderer;
@@ -112,7 +124,7 @@ static UIImage *YTImageNamed(NSString *imageName) {
 %end
 
 %hook YTSettings
-- (void)setDisableMDXDeviceDiscovery:(BOOL)arg1 { %orig(ytlBool(@"noCast")); }
+- (void)setDisableMDXDeviceDiscovery:(BOOL)arg1 { %orig(kNoCast)); }
 %end
 
 // Hide Navigation Bar Buttons
@@ -125,7 +137,7 @@ static UIImage *YTImageNamed(NSString *imageName) {
 
     for (UIView *subview in self.subviews) {
         if (ytlBool(@"noVoiceSearchButton") && [subview.accessibilityLabel isEqualToString:NSLocalizedString(@"search.voice.access", nil)]) subview.hidden = YES;
-        if (ytlBool(@"noCast") && [subview.accessibilityIdentifier isEqualToString:@"id.mdx.playbackroute.button"]) subview.hidden = YES;
+        if (kNoCast) && [subview.accessibilityIdentifier isEqualToString:@"id.mdx.playbackroute.button"]) subview.hidden = YES;
     }
 }
 %end
@@ -1143,7 +1155,7 @@ static void genImageFromLayer(CALayer *layer, UIColor *backgroundColor, void (^c
     NSMutableArray <YTIPivotBarSupportedRenderers *> *items = [renderer itemsArray];
 
     NSDictionary *identifiersToRemove = @{
-        @"FEshorts": @[@(ytlBool(@"removeShorts")), @(ytlBool(@"reExplore"))],
+        @"FEshorts": @[@(kRemoveShorts)s")), @(ytlBool(@"reExplore"))],
         @"FEsubscriptions": @[@(ytlBool(@"removeSubscriptions"))],
         @"FEuploads": @[@(ytlBool(@"removeUploads"))],
         @"FElibrary": @[@(ytlBool(@"removeLibrary"))]
@@ -1381,7 +1393,9 @@ static NSURL *newCoverURL(NSURL *originalURL) {
 // %end
 
 %ctor {
-    if (ytlBool(@"shortsOnlyMode") && (ytlBool(@"removeShorts") || ytlBool(@"reExplore"))) {
+    ReloadPreferences();
+
+    if (ytlBool(@"shortsOnlyMode") && (kRemoveShorts)s") || ytlBool(@"reExplore"))) {
         ytlSetBool(NO, @"removeShorts");
         ytlSetBool(NO, @"reExplore");
     }
