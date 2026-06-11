@@ -182,12 +182,19 @@ jobs:
       - name: Build YTUHD
         if: ${{ inputs.enable_ytuhd }}
         run: |
-         cd "$THEOS/include/YTUHD" && git submodule update --init --recursive
+         set -e
+         cd "$THEOS/include/YTUHD"
+         git submodule update --init --recursive
 
-         cd "$THEOS/include/YTUHD/vendor/libvpx_ios" && make
-         cd "$THEOS/include/YTUHD/vendor/dav1d_ios" && make
+         if [ ! -f vendor/libvpx_ios/libvpx.a ]; then
+         (cd vendor/libvpx_ios && make)
+         fi
 
-         cd "$THEOS/include/YTUHD" && make clean package DEBUG=0 FINALPACKAGE=1 SIDELOAD=1
+         if [ ! -f vendor/dav1d_ios/libdav1d.a ]; then
+         (cd vendor/dav1d_ios && make)
+         fi
+
+         make clean package DEBUG=0 FINALPACKAGE=1 SIDELOAD=1
 
          mv packages/*.deb ../ytuhd.deb
 
