@@ -140,6 +140,15 @@ jobs:
         if: ${{ inputs.enable_ytuhd }}
         run: git clone --quiet --depth=1 https://github.com/PoomSmart/YTUHD.git "$THEOS/include/YTUHD"
         
+      - name: Cache YTUHD vendor builds
+        if: ${{ inputs.enable_ytuhd }}
+        uses: actions/cache@v4
+        with:
+         path: |
+          $THEOS/include/YTUHD/vendor/libvpx_ios
+          $THEOS/include/YTUHD/vendor/dav1d_ios
+         key: ytuhd-vendor-${{ runner.os }}
+
       - name: Clone Return-YouTube-Dislikes
         if: ${{ inputs.enable_ryd }}
         run: git clone --quiet --depth=1 https://github.com/PoomSmart/Return-YouTube-Dislikes.git
